@@ -5,15 +5,28 @@ using System.Linq;
 
 namespace ChinesePoker.Core.Rules
 {
+    public class RuleMatchResult
+    {
+        public bool CheckResult { get; set; }
+
+        public IRule Rule { get; set; }
+    }
+
     public class RuleChecker
     {
-        public static bool Check(IEnumerable<Poker> pokers)
+        public static RuleMatchResult Check(IEnumerable<Poker> pokers)
         {
             if (pokers == null || !pokers.Any())
                 throw new ArgumentException(nameof(pokers));
 
             if (pokers.Count() == 1)
-                return true;
+            {
+                return new RuleMatchResult
+                {
+                    CheckResult = true,
+                    Rule = new SingleCard(pokers.First())
+                };
+            }
 
             var rules = new List<IRule>();
             //大于等于5
@@ -44,10 +57,16 @@ namespace ChinesePoker.Core.Rules
             foreach (var rule in rules)
             {
                 if (rule.Check())
-                    return true;
+                {
+                    return new RuleMatchResult
+                    {
+                        CheckResult = true,
+                        Rule = rule
+                    };
+                }
             }
 
-            return false;
+            return new RuleMatchResult { CheckResult = false };
         }
     }
 }

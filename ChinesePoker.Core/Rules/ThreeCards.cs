@@ -13,6 +13,11 @@ namespace ChinesePoker.Core.Rules
             LimitNumber = 3;
         }
 
+        public override IRule New(IEnumerable<Poker> pokers)
+        {
+            return new ThreeCards(pokers);
+        }
+
         public override string Description { get; } = "三个";
     }
 }

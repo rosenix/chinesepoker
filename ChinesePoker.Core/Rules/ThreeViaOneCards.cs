@@ -31,6 +31,11 @@ namespace ChinesePoker.Core.Rules
             return Pokers.Count(x => x.Display == pokerKeys.First()) == 3 || Pokers.Count(x => x.Display == pokerKeys.Last()) == 3;
         }
 
+        public IRule New(IEnumerable<Poker> pokers)
+        {
+            return new ThreeViaOneCards(pokers);
+        }
+
         private Poker FindThreeSamePoker(IEnumerable<Poker> Pokers)
         {
             var pokerKeys = Pokers.Select(x => x.Display).Distinct();

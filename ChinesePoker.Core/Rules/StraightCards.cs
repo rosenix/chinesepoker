@@ -37,6 +37,11 @@ namespace ChinesePoker.Core.Rules
             return Pokers.Max(x => x.Weight) - Pokers.Min(x => x.Weight) == Pokers.Count - 1;
         }
 
+        public IRule New(IEnumerable<Poker> pokers)
+        {
+            return new StraightCards(pokers);
+        }
+
         public int CompareTo(IRule other)
         {
             return Pokers.Max(x => x.Weight).CompareTo(other.Pokers.Max(x => x.Weight));

@@ -15,6 +15,11 @@ namespace ChinesePoker.Core.Rules
 
         public override string Description { get; } = "一对";
 
+        public override IRule New(IEnumerable<Poker> pokers)
+        {
+            return new CoupleCards(pokers);
+        }
+
         public override bool Check()
         {
             if (!base.Check())

@@ -19,6 +19,11 @@ namespace ChinesePoker.Core.Rules
             LimitNumber = 1;
         }
 
+        public override IRule New(IEnumerable<Poker> pokers)
+        {
+            return new SingleCard(pokers.First());
+        }
+
         public Poker Current { get; }
 
         public override string Description { get; } = "单牌";

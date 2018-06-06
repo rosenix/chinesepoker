@@ -34,6 +34,11 @@ namespace ChinesePoker.Core.Rules
             return Pokers.Count(x => x.Display == pokerKeys.First()) == 4 || Pokers.Count(x => x.Display == pokerKeys.Last()) == 4;
         }
 
+        public IRule New(IEnumerable<Poker> pokers)
+        {
+            return new FourViaTwoCards(pokers);
+        }
+
         private Poker FindFourSamePoker(IEnumerable<Poker> Pokers)
         {
             var pokerKeys = Pokers.Select(x => x.Display).Distinct();

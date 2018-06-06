@@ -11,6 +11,12 @@ namespace ChinesePoker.Core.Rules
         public ThreeViaTwoCards(IEnumerable<Poker> pokers) : base(pokers)
         {
         }
+
+        public new IRule New(IEnumerable<Poker> pokers)
+        {
+            return new ThreeViaTwoCards(pokers);
+        }
+
         /// <summary>
         /// 牌数量规则
         /// </summary>

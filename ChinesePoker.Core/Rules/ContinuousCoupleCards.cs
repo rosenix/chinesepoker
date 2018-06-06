@@ -30,9 +30,14 @@ namespace ChinesePoker.Core.Rules
             //不能包含大小王和2
             if (!Pokers.Select(x => x.Display).Distinct().All(x => Pokers.Count(y => y.Display == x) == 2))
                 return false;
-            
+
             //判断牌是否是连续的，这里是最大的减去最小的等于一个值
             return Pokers.Max(x => x.Weight) - Pokers.Min(x => x.Weight) == Pokers.Count - 1;
+        }
+
+        public IRule New(IEnumerable<Poker> pokers)
+        {
+            return new ContinuousCoupleCards(pokers);
         }
 
         public int CompareTo(IRule other)

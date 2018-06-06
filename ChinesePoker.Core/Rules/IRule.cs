@@ -17,6 +17,12 @@ namespace ChinesePoker.Core.Rules
         bool Check();
 
         /// <summary>
+        /// 验证牌是否符合规则
+        /// </summary>
+        /// <returns></returns>
+        IRule New(IEnumerable<Poker> pokers);
+
+        /// <summary>
         /// 牌
         /// </summary>
         ImmutableList<Poker> Pokers { get; }
@@ -52,6 +58,8 @@ namespace ChinesePoker.Core.Rules
 
             return true;
         }
+
+        public abstract IRule New(IEnumerable<Poker> pokers);
 
         public int CompareTo(IRule other)
         {

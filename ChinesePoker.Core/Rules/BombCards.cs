@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace ChinesePoker.Core.Rules
 {
@@ -16,6 +17,11 @@ namespace ChinesePoker.Core.Rules
         }
 
         public override string Description { get; } = "炸弹";
+
+        public override IRule New(IEnumerable<Poker> pokers)
+        {
+            return new BombCards(pokers);
+        }
     }
 
     /// <summary>
@@ -37,6 +43,11 @@ namespace ChinesePoker.Core.Rules
         public bool Check()
         {
             return _bking.Display == PokerConstants.Poker_BJ.Display && _pking.Display == PokerConstants.Poker_LJ.Display;
+        }
+
+        public IRule New(IEnumerable<Poker> pokers)
+        {
+            return new KingBombCards(pokers.First(), pokers.Last());
         }
 
         public int CompareTo(IRule other)
