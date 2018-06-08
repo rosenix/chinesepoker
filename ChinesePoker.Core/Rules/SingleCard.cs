@@ -16,11 +16,12 @@ namespace ChinesePoker.Core.Rules
         public SingleCard(List<Poker> pokers) : base(pokers)
         {
             Current = pokers.First();
-            LimitNumber = 1;
         }
 
+        protected override int LimitNumber { get; } = 1;
+
         public override IRule New(IEnumerable<Poker> pokers)
-        {
+        {            
             return new SingleCard(pokers.First());
         }
 

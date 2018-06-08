@@ -10,8 +10,9 @@ namespace ChinesePoker.Core.Rules
     {
         public CoupleCards(IEnumerable<Poker> pokers) : base(pokers)
         {
-            LimitNumber = 2;
         }
+
+        protected override int LimitNumber { get; } = 2;
 
         public override string Description { get; } = "一对";
 

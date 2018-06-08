@@ -47,6 +47,9 @@ namespace ChinesePoker.Core.Rules
 
         public int CompareTo(IRule other)
         {
+            if (other is BombCards || other is KingBombCards)
+                return 1;
+
             return FindThreeSamePoker(Pokers).Weight.CompareTo(FindThreeSamePoker(other.Pokers).Weight);
         }
 

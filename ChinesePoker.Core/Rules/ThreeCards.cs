@@ -10,8 +10,9 @@ namespace ChinesePoker.Core.Rules
     {
         public ThreeCards(IEnumerable<Poker> pokers) : base(pokers)
         {
-            LimitNumber = 3;
         }
+
+        protected override int LimitNumber { get; } = 3;
 
         public override IRule New(IEnumerable<Poker> pokers)
         {

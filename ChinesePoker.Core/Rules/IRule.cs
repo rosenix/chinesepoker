@@ -35,7 +35,7 @@ namespace ChinesePoker.Core.Rules
 
     public abstract class SameNumberCards : IComparable<IRule>
     {
-        protected int LimitNumber { get; set; }
+        protected virtual int LimitNumber { get; }
 
         public SameNumberCards(IEnumerable<Poker> pokers)
         {
@@ -46,7 +46,7 @@ namespace ChinesePoker.Core.Rules
             NumberLimit = new NumberLimitRule { Count = LimitNumber, Type = NumberLimitType.Equal };
         }
 
-        public abstract string Description { get; } 
+        public abstract string Description { get; }
 
         public virtual bool Check()
         {
@@ -61,9 +61,12 @@ namespace ChinesePoker.Core.Rules
 
         public abstract IRule New(IEnumerable<Poker> pokers);
 
-        public int CompareTo(IRule other)
+        public virtual int CompareTo(IRule other)
         {
-            return other.Pokers.First().Weight.CompareTo(other.Pokers.First().Weight);
+            if (other is BombCards || other is KingBombCards)
+                return 1;
+
+            return Pokers.First().Weight.CompareTo(other.Pokers.First().Weight);
         }
 
         public ImmutableList<Poker> Pokers { get; private set; }

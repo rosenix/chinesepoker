@@ -44,6 +44,9 @@ namespace ChinesePoker.Core.Rules
 
         public int CompareTo(IRule other)
         {
+            if (other is BombCards || other is KingBombCards)
+                return 1;
+
             return Pokers.Max(x => x.Weight).CompareTo(other.Pokers.Max(x => x.Weight));
         }
 

@@ -32,13 +32,6 @@ namespace ChinesePoker.Core.Tests
             var results = deal.Do(strategy);
             results.ForEach(x => x.LoadPokers(pokers));
 
-            foreach (var result in results)
-            {
-                Console.Write($"[{result.User.UserRole}]{result.User.Display}：");
-                Console.WriteLine(string.Join(",", result.Pokers.Select(x => x.Display)));
-            }
-
-
 
             Console.Write("hole pokers：");
             Console.WriteLine(string.Join("，", strategy.HolePokers.Select(x => pokers.Find(x.PokerKey)).Select(x => x.Display)));
@@ -47,25 +40,25 @@ namespace ChinesePoker.Core.Tests
 
             IUser showUser = results.First(x => x.User.UserRole == DoudizhuUser.Role.Landowner).User;
             DoudizhuUser noPokersUser = null;
-            ShowCardResult showResult = null;
             while (true)
             {
                 var showList = new List<ShowCardResult>();
                 while (true)
                 {
-                    if (showList.Count >= 3 && showList[showList.Count - 3].User == showUser)
+
+                    if (showList.Count >= 3 && showList.Last(x => x.Pokers.Any()).User == showUser)
                     {
                         showList.Clear();
                         break;
                     }
 
-                    showResult = ShowCard(showUser, results, showResult);
+                    var showResult = ShowCard(showUser, results, showList.LastOrDefault());
                     showUser = showUser.GetNextUser();
                     showList.Add(showResult);
                 }
 
                 var noPokersResult = results.FirstOrDefault(x => x.PokerKeys.Count == 0);
-                if (noPokersUser != null)
+                if (noPokersResult != null)
                 {
                     noPokersUser = noPokersResult.User;
                     break;
@@ -81,25 +74,26 @@ namespace ChinesePoker.Core.Tests
         {
             var pokers = results.First(x => x.User.Id == user.Id).Pokers;
             Console.WriteLine($"{user.Display}，{string.Join(",", pokers.Select(x => $"{x.Display}({x.Key})"))}");
-            Console.Write($"{user.Display} select pokers:");
+            Console.Write($"[{(user as DoudizhuUser).UserRole.ToString()}]{user.Display}[{pokers.Count}] select pokers:");
+
             var readString = Console.ReadLine();
             if (string.IsNullOrEmpty(readString))
             {
-                if (prevShowResult == null)
-                {
-                    Console.WriteLine("出牌不符合规则，请重新出！");
-                    ShowCard(user, results);
-                }
+                //if (prevShowResult == null)
+                //{
+                //    Console.WriteLine("出牌不符合规则，请重新出！");
+                //    ShowCard(user, results);
+                //}
 
-                return new ShowCardResult
-                {
-                    RuleMatcher = new RuleMatchResult { CheckResult = true },
-                    Result = ShowCardResult.ShowCardResultType.Show
-                };
-
+                //return new ShowCardResult
+                //{
+                //    RuleMatcher = new RuleMatchResult { CheckResult = true },
+                //    Result = ShowCardResult.ShowCardResultType.NotGiven
+                //};
+                readString = "P";
             }
 
-            if (readString == "P")
+            if (readString.ToUpper() == "P")
             {
                 if (prevShowResult != null)
                 {
@@ -109,60 +103,65 @@ namespace ChinesePoker.Core.Tests
                 else
                 {
                     Console.WriteLine("头家不能PASS，请重新出！");
-                    ShowCard(user, results);
+                    return ShowCard(user, results);
                 }
             }
 
-            var selectedPokerKeys = readString.Split(",");
-            var selectPokers = pokers.Where(x => selectedPokerKeys.Any(y => y == x.Key));
-            if (selectPokers.Count() != selectedPokerKeys.Length)
+            var selectedPokerKeys = readString.Split(",").ToList();
+            var selectedPokers = pokers.Where(x => selectedPokerKeys.Any(y => y == x.Key)).ToList();
+            if (selectedPokers.Count() != selectedPokerKeys.Count)
             {
                 Console.WriteLine("你恐怕出了你不存在的牌吧，请重新出！");
-                ShowCard(user, results);
+                return ShowCard(user, results, prevShowResult);
             }
 
             if (prevShowResult == null)
             {
-                var ruleMatcher = RuleChecker.Check(selectPokers);
+                var ruleMatcher = RuleChecker.Check(selectedPokers);
                 //验证是否正确
                 if (!ruleMatcher.CheckResult)
                 {
                     Console.WriteLine("出牌不符合规则，请重新出！");
-                    ShowCard(user, results);
+                    return ShowCard(user, results);
                 }
 
                 //移除用户手中的牌
                 pokers.RemoveAll(x => selectedPokerKeys.Any(y => x.Key == y));
+                results.First(x => x.User.Id == user.Id).PokerKeys.RemoveAll(x => selectedPokerKeys.Contains(x.PokerKey));
 
                 return new ShowCardResult
                 {
                     RuleMatcher = ruleMatcher,
-                    Pokers = selectPokers,
+                    Pokers = selectedPokers,
                     Result = ShowCardResult.ShowCardResultType.Show,
                     User = user
                 };
             }
 
-            var currentRule = prevShowResult.RuleMatcher.Rule.New(selectPokers);
+            var currentRule = RuleHelper.BuildBoomRule(selectedPokers);
+            if (currentRule == null)
+                currentRule = prevShowResult.RuleMatcher.Rule.New(selectedPokers);
+
             if (!currentRule.Check())
             {
                 Console.WriteLine("出牌不符合规则，请重新出！");
-                ShowCard(user, results);
+                return ShowCard(user, results, prevShowResult);
             }
-            if (currentRule.CompareTo(prevShowResult.RuleMatcher.Rule) > 0)
+            if (currentRule.CompareTo(prevShowResult.RuleMatcher.Rule) <= 0)
             {
                 Console.WriteLine("出牌不符合规则，请重新出！");
-                ShowCard(user, results);
+                return ShowCard(user, results, prevShowResult);
             }
 
             //移除用户手中的牌
             pokers.RemoveAll(x => selectedPokerKeys.Any(y => x.Key == y));
+            results.First(x => x.User.Id == user.Id).PokerKeys.RemoveAll(x => selectedPokerKeys.Contains(x.PokerKey));
 
             return new ShowCardResult
             {
                 RuleMatcher = new RuleMatchResult { Rule = currentRule, CheckResult = true },
                 Result = ShowCardResult.ShowCardResultType.Show,
-                Pokers = selectPokers,
+                Pokers = selectedPokers,
                 User = user
             };
         }

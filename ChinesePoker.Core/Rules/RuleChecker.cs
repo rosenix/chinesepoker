@@ -50,8 +50,7 @@ namespace ChinesePoker.Core.Rules
             else if (pokers.Count() == 2)
             {
                 rules.Add(new CoupleCards(pokers));
-                rules.Add(new KingBombCards(pokers.FirstOrDefault(x => x.Display == PokerConstants.Poker_BJ.Display) ?? Poker.Empty,
-                    pokers.FirstOrDefault(x => x.Display == PokerConstants.Poker_LJ.Display) ?? Poker.Empty));
+                rules.Add(new KingBombCards(pokers));
             }
 
             foreach (var rule in rules)

@@ -13,10 +13,19 @@ namespace ChinesePoker.Core.Rules
     {
         public BombCards(IEnumerable<Poker> pokers) : base(pokers)
         {
-            LimitNumber = 4;
         }
 
+        protected override int LimitNumber { get; } = 4;
+
         public override string Description { get; } = "炸弹";
+
+        public override int CompareTo(IRule other)
+        {
+            if (other is KingBombCards)
+                return 1;
+
+            return Pokers.First().Weight.CompareTo(other.Pokers.First().Weight);
+        }
 
         public override IRule New(IEnumerable<Poker> pokers)
         {
@@ -29,30 +38,24 @@ namespace ChinesePoker.Core.Rules
     /// </summary>
     public class KingBombCards : IRule
     {
-        private readonly Poker _bking;
-        private readonly Poker _pking;
-
-        public KingBombCards(Poker bking, Poker pking)
+        public KingBombCards(IEnumerable<Poker> pokers)
         {
-            _bking = bking ?? throw new ArgumentNullException(nameof(bking));
-            _pking = pking ?? throw new ArgumentNullException(nameof(pking));
+            if (pokers == null)
+                throw new ArgumentNullException(nameof(pokers));
 
-            Pokers = new Poker[] { _bking, _pking }.ToImmutableList();
+            Pokers = pokers.ToImmutableList();
         }
 
-        public bool Check()
-        {
-            return _bking.Display == PokerConstants.Poker_BJ.Display && _pking.Display == PokerConstants.Poker_LJ.Display;
-        }
+        public bool Check() => RuleHelper.IsKingCouple(Pokers);
 
         public IRule New(IEnumerable<Poker> pokers)
         {
-            return new KingBombCards(pokers.First(), pokers.Last());
+            return new KingBombCards(pokers);
         }
 
         public int CompareTo(IRule other)
         {
-            return -1;
+            return 1;
         }
 
         /// <summary>
